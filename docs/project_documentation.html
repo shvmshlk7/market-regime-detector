@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Regime Detector + Portfolio Optimizer — Project Documentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bull:    #16a34a;
+    --bear:    #dc2626;
+    --side:    #d97706;
+    --blue:    #2563eb;
+    --purple:  #7c3aed;
+    --dark:    #0f172a;
+    --mid:     #1e293b;
+    --card:    #f8fafc;
+    --border:  #e2e8f0;
+    --text:    #1e293b;
+    --muted:   #64748b;
+    --accent:  #0ea5e9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: #fff;
+    font-size: 13.5px;
+    line-height: 1.7;
+  }
+
+  /* ── COVER PAGE ─────────────────────────────────────────────────── */
+  .cover {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 40px;
+    text-align: center;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%);
+    top: -150px; right: -100px;
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%);
+    bottom: -100px; left: -80px;
+  }
+
+  .cover-badge {
+    background: rgba(14,165,233,0.15);
+    border: 1px solid rgba(14,165,233,0.3);
+    color: #7dd3fc;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .cover h1 {
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .cover h1 span { color: #38bdf8; }
+
+  .cover .subtitle {
+    font-size: 18px;
+    color: #94a3b8;
+    margin-bottom: 48px;
+    max-width: 600px;
+  }
+
+  .cover-stats {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .cover-stat {
+    text-align: center;
+  }
+
+  .cover-stat .num {
+    font-size: 36px;
+    font-weight: 800;
+    color: #38bdf8;
+    display: block;
+  }
+
+  .cover-stat .lbl {
+    font-size: 11px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .cover-phases {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+  }
+
+  .cover-phase {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #cbd5e1;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+
+  .cover-phase.done {
+    background: rgba(22,163,74,0.15);
+    border-color: rgba(22,163,74,0.3);
+    color: #86efac;
+  }
+
+  .cover-phase.done::before { content: '✓  '; }
+
+  .cover-meta {
+    position: absolute;
+    bottom: 30px;
+    color: #475569;
+    font-size: 11.5px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────────────────────── */
+  .content { max-width: 900px; margin: 0 auto; padding: 0 40px; }
+
+  /* ── SECTION HEADERS ────────────────────────────────────────────── */
+  .section-break {
+    page-break-before: always;
+    padding-top: 48px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 8px;
+    line-height: 1.25;
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 28px 0 10px;
+  }
+
+  h4 {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0 8px;
+  }
+
+  .section-intro {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    max-width: 700px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 24px;
+  }
+
+  p { margin-bottom: 12px; }
+
+  /* ── CARDS ──────────────────────────────────────────────────────── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .card .card-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--dark);
+    margin-bottom: 6px;
+  }
+
+  .card p { color: var(--muted); font-size: 12.5px; margin-bottom: 0; }
+
+  /* ── PHASE CARDS ─────────────────────────────────────────────────── */
+  .phase-card {
+    border-left: 4px solid var(--accent);
+    background: #f0f9ff;
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .phase-card.done { border-left-color: var(--bull); background: #f0fdf4; }
+  .phase-card.next { border-left-color: var(--side); background: #fffbeb; }
+  .phase-card.future { border-left-color: #e2e8f0; background: #f8fafc; }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .phase-num {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .phase-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    flex: 1;
+  }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .badge-done { background: #dcfce7; color: #16a34a; }
+  .badge-next { background: #fef3c7; color: #d97706; }
+  .badge-future { background: #f1f5f9; color: #64748b; }
+
+  /* ── REGIME BOXES ────────────────────────────────────────────────── */
+  .regime-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+
+  .regime-box {
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+
+  .regime-box.bull { background: #f0fdf4; border: 2px solid #86efac; }
+  .regime-box.bear { background: #fef2f2; border: 2px solid #fca5a5; }
+  .regime-box.side { background: #fffbeb; border: 2px solid #fcd34d; }
+
+  .regime-icon { font-size: 28px; margin-bottom: 8px; }
+
+  .regime-name {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+
+  .regime-box.bull .regime-name { color: var(--bull); }
+  .regime-box.bear .regime-name { color: var(--bear); }
+  .regime-box.side .regime-name { color: var(--side); }
+
+  .regime-desc { font-size: 11.5px; color: var(--muted); margin-bottom: 0; }
+
+  /* ── FEATURE TABLE ───────────────────────────────────────────────── */
+  .feature-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 12.5px;
+  }
+
+  .feature-table th {
+    background: var(--dark);
+    color: #fff;
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .feature-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .feature-table tr:nth-child(even) td { background: #f8fafc; }
+
+  .feature-table tr:hover td { background: #f0f9ff; }
+
+  .feature-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-vol { background: #dbeafe; color: #1d4ed8; }
+  .tag-mom { background: #e0e7ff; color: #4338ca; }
+  .tag-mac { background: #fce7f3; color: #be185d; }
+  .tag-crs { background: #d1fae5; color: #065f46; }
+
+  /* ── CODE BLOCKS ─────────────────────────────────────────────────── */
+  pre, code {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 20px 24px;
+    border-radius: 10px;
+    font-size: 12px;
+    overflow-x: auto;
+    margin: 16px 0;
+    line-height: 1.6;
+  }
+
+  code {
+    background: #f1f5f9;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .comment { color: #64748b; }
+  .kw { color: #7dd3fc; }
+  .fn { color: #a5f3fc; font-weight: 500; }
+  .str { color: #86efac; }
+  .num { color: #fcd34d; }
+  .cls { color: #c084fc; }
+
+  /* ── FLOW DIAGRAM ────────────────────────────────────────────────── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 32px 0;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+
+  .flow-step {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 16px 18px;
+    background: var(--dark);
+    border-radius: 10px;
+    color: #fff;
+    min-width: 110px;
+  }
+
+  .flow-step .fs-num {
+    font-size: 10px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .flow-step .fs-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin: 4px 0;
+    color: #e2e8f0;
+  }
+
+  .flow-step .fs-sub {
+    font-size: 10px;
+    color: #94a3b8;
+  }
+
+  .flow-step.done { background: #14532d; }
+  .flow-step.next { background: #78350f; }
+
+  .flow-arrow {
+    color: #94a3b8;
+    font-size: 20px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── HIGHLIGHT BOXES ─────────────────────────────────────────────── */
+  .highlight {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+
+  .highlight.info { background: #eff6ff; border-left: 4px solid #3b82f6; }
+  .highlight.tip  { background: #f0fdf4; border-left: 4px solid #22c55e; }
+  .highlight.warn { background: #fffbeb; border-left: 4px solid #f59e0b; }
+
+  .highlight strong { display: block; margin-bottom: 4px; }
+
+  /* ── LISTS ──────────────────────────────────────────────────────── */
+  ul, ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+  }
+
+  li { margin-bottom: 5px; color: var(--text); }
+
+  /* ── ETF TABLE ──────────────────────────────────────────────────── */
+  .etf-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .etf-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .etf-ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--dark);
+    display: block;
+  }
+
+  .etf-name {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── DIVIDER ────────────────────────────────────────────────────── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ── TECH STACK ─────────────────────────────────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 16px 0;
+  }
+
+  .tech-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+
+  .tech-card .tech-name {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--dark);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tech-card .tech-use {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ── PAGE BREAKS ─────────────────────────────────────────────────── */
+  @media print {
+    .cover { min-height: 100vh; }
+    .section-break { page-break-before: always; }
+    pre { page-break-inside: avoid; }
+    .phase-card { page-break-inside: avoid; }
+  }
+
+  /* ── FOOTER ─────────────────────────────────────────────────────── */
+  .page-footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11px;
+    padding: 32px 0 48px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+
+  .spacer { height: 32px; }
+  .spacer-sm { height: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- COVER PAGE -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">Project Documentation · 2026</div>
+  <h1>Market Regime Detector<br><span>+ Portfolio Optimizer</span></h1>
+  <p class="subtitle">An end-to-end AI system that detects stock market conditions using machine learning and automatically adjusts your investment portfolio to match.</p>
+
+  <div class="cover-stats">
+    <div class="cover-stat">
+      <span class="num">6</span>
+      <span class="lbl">Phases</span>
+    </div>
+    <div class="cover-stat">
+      <span class="num">15</span>
+      <span class="lbl">ML Features</span>
+    </div>
+    <div class="cover-stat">
+      <span class="num">10</span>
+      <span class="lbl">ETFs</span>
+    </div>
+    <div class="cover-stat">
+      <span class="num">15+</span>
+      <span class="lbl">Years of Data</span>
+    </div>
+  </div>
+
+  <div class="cover-phases">
+    <div class="cover-phase done">Phase 1 · Data Pipeline</div>
+    <div class="cover-phase done">Phase 2 · Feature Engineering</div>
+    <div class="cover-phase done">Phase 3 · HMM Regime Detection</div>
+    <div class="cover-phase">Phase 4 · Portfolio Optimization</div>
+    <div class="cover-phase">Phase 5 · Backtesting</div>
+    <div class="cover-phase">Phase 6 · Live Dashboard</div>
+  </div>
+
+  <div class="cover-meta">Python 3.12 · hmmlearn · scikit-learn · PyPortfolioOpt · Streamlit</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1: WHAT IS THIS PROJECT? -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content">
+  <div class="spacer"></div>
+  <div class="section-label">Section 01</div>
+  <h2>What Is This Project?</h2>
+  <p class="section-intro">A jargon-free explanation of what the project does, why it exists, and who it is for.</p>
+
+  <h3>The Simple Version</h3>
+  <p>Stock markets don't behave the same way every day. Sometimes they go up consistently for months (a <strong>Bull market</strong>). Sometimes they crash and fall rapidly (a <strong>Bear market</strong>). And sometimes they just move sideways, going nowhere in particular (<strong>Sideways market</strong>).</p>
+  <p>This project is a <strong>computer system that automatically detects which of these three conditions the market is currently in</strong> — and then tells you how to split your money across 10 different investments to get the best return for the least risk in that specific condition.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">🤔 The Problem</div>
+      <p>Investors and fund managers lose money by using the same strategy in all market conditions. A strategy that works in a Bull market often loses big during a Bear market.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">💡 The Solution</div>
+      <p>Use machine learning (specifically a Hidden Markov Model) to detect the current market regime from data — then optimize the portfolio specifically for that regime.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 The Data</div>
+      <p>15+ years of daily price data for 10 major ETFs, plus economic indicators (VIX fear index, yield curve, CPI inflation, unemployment) from the US Federal Reserve.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🎯 The Goal</div>
+      <p>Beat a simple "buy and hold SPY" strategy by being smart about when to be aggressive (Bull) versus defensive (Bear) with your investments.</p>
+    </div>
+  </div>
+
+  <h3>Why Regimes Matter — A Real-World Analogy</h3>
+  <div class="highlight info">
+    <strong>🌦️ Think of it like weather forecasting for money</strong>
+    Just like you dress differently depending on the weather — rain gear for storms, light clothes for sunny days — a smart investor allocates money differently depending on market "weather." This project is the weather forecast system. It tells you today's market climate so you can dress (invest) appropriately.
+  </div>
+
+  <h3>The Three Market Regimes</h3>
+  <div class="regime-grid">
+    <div class="regime-box bull">
+      <div class="regime-icon">🐂</div>
+      <div class="regime-name">Bull</div>
+      <p class="regime-desc">Markets rising steadily. Low fear. Strong momentum. Best time to hold growth stocks like SPY, QQQ, IWM.</p>
+    </div>
+    <div class="regime-box bear">
+      <div class="regime-icon">🐻</div>
+      <div class="regime-name">Bear</div>
+      <p class="regime-desc">Markets falling. High fear (VIX spike). Negative momentum. Rotate to safe havens: Gold (GLD), Bonds (TLT).</p>
+    </div>
+    <div class="regime-box side">
+      <div class="regime-icon">↔️</div>
+      <div class="regime-name">Sideways</div>
+      <p class="regime-desc">No clear direction. Mixed signals. Hold a balanced, diversified allocation across all asset types.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2: PROJECT FLOW -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 02</div>
+  <h2>How the Project Works — Full Flow</h2>
+  <p class="section-intro">From raw data to investment decision. Every step explained in plain English.</p>
+
+  <div class="flow">
+    <div class="flow-step done">
+      <div class="fs-num">Phase 1</div>
+      <div class="fs-name">Data Pipeline</div>
+      <div class="fs-sub">yfinance + FRED</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step done">
+      <div class="fs-num">Phase 2</div>
+      <div class="fs-name">Feature Eng.</div>
+      <div class="fs-sub">15 signals</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step done">
+      <div class="fs-num">Phase 3</div>
+      <div class="fs-name">Regime HMM</div>
+      <div class="fs-sub">Bull/Bear/Side</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step next">
+      <div class="fs-num">Phase 4</div>
+      <div class="fs-name">Portfolio Opt</div>
+      <div class="fs-sub">PyPortfolioOpt</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step next">
+      <div class="fs-num">Phase 5</div>
+      <div class="fs-name">Backtesting</div>
+      <div class="fs-sub">vectorbt</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step next">
+      <div class="fs-num">Phase 6</div>
+      <div class="fs-name">Dashboard</div>
+      <div class="fs-sub">Streamlit</div>
+    </div>
+  </div>
+
+  <h3>Step-by-Step Breakdown</h3>
+
+  <!-- Phase 1 -->
+  <div class="phase-card done">
+    <div class="phase-header">
+      <span class="phase-num">Phase 1</span>
+      <span class="phase-title">Data Collection — DataLoader</span>
+      <span class="badge badge-done">✓ Complete</span>
+    </div>
+    <p><strong>What it does:</strong> Downloads 15+ years of daily stock prices for 10 ETFs using <code>yfinance</code>. Also downloads economic data (VIX fear index, US Treasury yield curve, CPI inflation, unemployment) from the US Federal Reserve's FRED database.</p>
+    <p><strong>Why this data?</strong> Price data alone isn't enough. The VIX tells us how scared the market is. The yield curve tells us if a recession might be coming. CPI tells us if inflation is high. Together, these give a complete picture of the market environment.</p>
+    <p><strong>Smart caching:</strong> All data is saved in Parquet files so the computer doesn't have to re-download everything each time. Subsequent runs load from disk in under 1 second.</p>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase-card done">
+    <div class="phase-header">
+      <span class="phase-num">Phase 2</span>
+      <span class="phase-title">Feature Engineering — FeatureEngineer</span>
+      <span class="badge badge-done">✓ Complete</span>
+    </div>
+    <p><strong>What it does:</strong> Transforms raw price and macro data into 15 clean, normalized signals that a machine learning model can understand. Raw prices are not useful to HMM — but metrics like "how volatile has the market been over the last 20 days compared to the last year?" are.</p>
+    <p><strong>The 4 feature groups:</strong> Volatility (how much prices move), Momentum (direction and speed of trend), Macro (economic environment), and Cross-Asset (how different markets relate to each other).</p>
+    <p><strong>Normalization:</strong> All 15 features are scaled using StandardScaler so no single feature dominates the model due to different units (e.g., a VIX value of 30 vs. a log return of 0.01).</p>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase-card done">
+    <div class="phase-header">
+      <span class="phase-num">Phase 3</span>
+      <span class="phase-title">Regime Detection — RegimeDetector (HMM)</span>
+      <span class="badge badge-done">✓ Complete</span>
+    </div>
+    <p><strong>What it does:</strong> Trains a Gaussian Hidden Markov Model on the 15 normalized features to discover 3 hidden states (regimes) in the data. The model learns which patterns of features correspond to Bull, Bear, and Sideways markets — without being told explicitly.</p>
+    <p><strong>Auto-labeling:</strong> After training, the 3 HMM states are automatically labeled. The state with the highest average daily return becomes "Bull", the lowest becomes "Bear", and the middle is "Sideways".</p>
+    <p><strong>Smoothing:</strong> A minimum 5-day hold rule prevents the model from flip-flopping between regimes on a single noisy day. Regime changes must be consistent for at least 5 trading days.</p>
+    <p><strong>Output:</strong> For every trading day, the model says "Bull", "Bear", or "Sideways" — with a confidence probability for each.</p>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase-card next">
+    <div class="phase-header">
+      <span class="phase-num">Phase 4</span>
+      <span class="phase-title">Portfolio Optimization — PortfolioOptimizer</span>
+      <span class="badge badge-next">▶ Up Next</span>
+    </div>
+    <p><strong>What it does:</strong> Given the current detected regime, calculates the optimal allocation (what % to put in each of the 10 ETFs) to maximize expected return for a given level of risk. Uses the Efficient Frontier and Mean-Variance Optimization from Nobel Prize-winning Modern Portfolio Theory.</p>
+    <p><strong>Regime-conditional:</strong> Different regimes get different target portfolios. Bull → more equities. Bear → more gold and bonds. Sideways → balanced blend.</p>
+    <p><strong>Constraints:</strong> No single asset can exceed 30% or fall below 5% of the total portfolio, ensuring diversification at all times.</p>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase-card future">
+    <div class="phase-header">
+      <span class="phase-num">Phase 5</span>
+      <span class="phase-title">Backtesting — Backtester</span>
+      <span class="badge badge-future">Planned</span>
+    </div>
+    <p><strong>What it does:</strong> Simulates the complete strategy over 15 years of historical data to see how well it would have performed. Compares the regime-switching strategy against simply buying and holding the S&amp;P 500 (SPY). Accounts for realistic transaction costs (0.1% per trade).</p>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase-card future">
+    <div class="phase-header">
+      <span class="phase-num">Phase 6</span>
+      <span class="phase-title">Live Dashboard — Streamlit App</span>
+      <span class="badge badge-future">Planned</span>
+    </div>
+    <p><strong>What it does:</strong> A beautiful, interactive web dashboard where you can see today's detected regime, current portfolio allocation, performance metrics, and historical regime timeline chart — all updated automatically.</p>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3: DATA & UNIVERSE -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 03</div>
+  <h2>Data Universe</h2>
+  <p class="section-intro">The 10 ETFs and economic indicators that power the system.</p>
+
+  <h3>The 10 ETFs (Exchange-Traded Funds)</h3>
+  <p>ETFs are funds that trade on stock exchanges and represent baskets of assets — they're low-cost and liquid. We use 10 ETFs that cover all major asset classes:</p>
+
+  <div class="etf-grid">
+    <div class="etf-card">
+      <span class="etf-ticker">SPY</span>
+      <div class="etf-name">S&amp;P 500 · Core US Equity</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">QQQ</span>
+      <div class="etf-name">Nasdaq 100 · Growth/Tech</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">IWM</span>
+      <div class="etf-name">Russell 2000 · Small Cap</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">GLD</span>
+      <div class="etf-name">Gold · Safe Haven</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">TLT</span>
+      <div class="etf-name">Long Bonds · Bear Hedge</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">LQD</span>
+      <div class="etf-name">Corp Bonds · Credit/Yield</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">VNQ</span>
+      <div class="etf-name">Real Estate · Inflation</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">USO</span>
+      <div class="etf-name">Oil Fund · Commodity</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">EFA</span>
+      <div class="etf-name">MSCI EAFE · Intl Developed</div>
+    </div>
+    <div class="etf-card">
+      <span class="etf-ticker">EEM</span>
+      <div class="etf-name">MSCI EM · Emerging Markets</div>
+    </div>
+  </div>
+
+  <h3>Economic Indicators (FRED)</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">📈 VIX — Fear Index</div>
+      <p>CBOE Volatility Index. Measures how much the market expects stocks to swing. High VIX (above 30) = panic. Low VIX (below 15) = complacency. The single most important fear gauge.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🏛️ Yield Curve (10Y - 2Y)</div>
+      <p>Difference between 10-year and 2-year US Treasury yields. When this goes negative ("inverted"), it has preceded every US recession in the past 50 years.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">💰 CPI — Inflation</div>
+      <p>Consumer Price Index tracks price changes over time. High, rising inflation forces the Federal Reserve to raise interest rates, which typically hurts stock valuations.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">👷 Unemployment Rate</div>
+      <p>Percentage of the workforce without a job. Rising fast unemployment signals economic stress and typical accompanies Bear market conditions.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4: THE 15 FEATURES -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 04</div>
+  <h2>The 15 Machine Learning Features</h2>
+  <p class="section-intro">What the HMM actually "sees" — the signals extracted from raw data to characterize market conditions.</p>
+
+  <table class="feature-table">
+    <thead>
+      <tr>
+        <th style="width:22%">Feature Name</th>
+        <th style="width:12%">Group</th>
+        <th>What It Measures</th>
+        <th style="width:22%">Why It Matters</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>spy_log_ret</code></td>
+        <td><span class="feature-tag tag-vol">Volatility</span></td>
+        <td>Daily log return of SPY: ln(Price today / Price yesterday)</td>
+        <td>Positive = market rose. Negative = market fell. Core direction signal.</td>
+      </tr>
+      <tr>
+        <td><code>spy_vol_20d</code></td>
+        <td><span class="feature-tag tag-vol">Volatility</span></td>
+        <td>Rolling 20-day realized volatility, annualized as %</td>
+        <td>Spikes during crashes. Low in calm Bull markets.</td>
+      </tr>
+      <tr>
+        <td><code>spy_vol_60d</code></td>
+        <td><span class="feature-tag tag-vol">Volatility</span></td>
+        <td>Rolling 60-day realized volatility, annualized as %</td>
+        <td>Background/structural volatility. Trend of vol over 3 months.</td>
+      </tr>
+      <tr>
+        <td><code>vol_ratio</code></td>
+        <td><span class="feature-tag tag-vol">Volatility</span></td>
+        <td>spy_vol_20d ÷ spy_vol_60d</td>
+        <td>&gt;1.0 = recent stress elevated vs. background. Key regime transition signal.</td>
+      </tr>
+      <tr>
+        <td><code>mom_1m_zscore</code></td>
+        <td><span class="feature-tag tag-mom">Momentum</span></td>
+        <td>1-month cumulative return, z-scored vs. past 252 days</td>
+        <td>How unusual is this month's return vs. the past year? Positive = above-trend.</td>
+      </tr>
+      <tr>
+        <td><code>mom_3m_zscore</code></td>
+        <td><span class="feature-tag tag-mom">Momentum</span></td>
+        <td>3-month cumulative return, z-scored vs. past 252 days</td>
+        <td>Medium-term trend strength. Persistence of Bull or Bear move.</td>
+      </tr>
+      <tr>
+        <td><code>mom_6m_zscore</code></td>
+        <td><span class="feature-tag tag-mom">Momentum</span></td>
+        <td>6-month cumulative return, z-scored vs. past 252 days</td>
+        <td>Long-term trend. Separates sustained Bull markets from short rallies.</td>
+      </tr>
+      <tr>
+        <td><code>vix_level</code></td>
+        <td><span class="feature-tag tag-mac">Macro</span></td>
+        <td>log(VIX) — log-transformed VIX level</td>
+        <td>Log transform stabilizes spikes. The primary fear barometer.</td>
+      </tr>
+      <tr>
+        <td><code>vix_zscore</code></td>
+        <td><span class="feature-tag tag-mac">Macro</span></td>
+        <td>VIX relative to its own 252-day rolling mean/std</td>
+        <td>Is fear elevated vs. its own recent history? Catches regime shifts.</td>
+      </tr>
+      <tr>
+        <td><code>yield_spread</code></td>
+        <td><span class="feature-tag tag-mac">Macro</span></td>
+        <td>10-year minus 2-year Treasury yield</td>
+        <td>Negative = inverted curve = recession signal.</td>
+      </tr>
+      <tr>
+        <td><code>yield_spread_chg</code></td>
+        <td><span class="feature-tag tag-mac">Macro</span></td>
+        <td>20-day change in yield spread</td>
+        <td>Is the curve steepening or flattening? Direction often leads equity regimes.</td>
+      </tr>
+      <tr>
+        <td><code>cpi_yoy</code></td>
+        <td><span class="feature-tag tag-mac">Macro</span></td>
+        <td>CPI year-over-year % change</td>
+        <td>High rising inflation → Bear signal (Fed tightening → stock pain).</td>
+      </tr>
+      <tr>
+        <td><code>bond_equity_corr</code></td>
+        <td><span class="feature-tag tag-crs">Cross-Asset</span></td>
+        <td>60-day rolling correlation between SPY and TLT returns</td>
+        <td>Negative → flight to safety. The classic Bear marker.</td>
+      </tr>
+      <tr>
+        <td><code>commodity_trend</code></td>
+        <td><span class="feature-tag tag-crs">Cross-Asset</span></td>
+        <td>20-day USO (oil) return, z-scored vs. 252-day history</td>
+        <td>Strong oil trend → economic expansion. Collapsing oil → Bear/recession.</td>
+      </tr>
+      <tr>
+        <td><code>spy_ma_ratio</code></td>
+        <td><span class="feature-tag tag-crs">Cross-Asset</span></td>
+        <td>SPY 50-day MA ÷ SPY 200-day MA</td>
+        <td>"Golden Cross" (&gt;1.0) = Bull. "Death Cross" (&lt;1.0) = Bear. Widely used.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5: HOW THE HMM WORKS -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 05</div>
+  <h2>How the Hidden Markov Model Works</h2>
+  <p class="section-intro">The AI brain of the system — explained without equations.</p>
+
+  <h3>What Is a Hidden Markov Model?</h3>
+  <p>A Hidden Markov Model (HMM) is a statistical model for situations where you observe something (like stock market data) but the true underlying state (like "Bull" or "Bear") is <em>hidden</em> — you can't see it directly.</p>
+
+  <div class="highlight info">
+    <strong>💡 The analogogy: A hidden weather machine</strong>
+    Imagine you're locked in a room with no windows. You can't see the weather outside (the hidden state), but you can observe whether people coming inside are wet or dry, wearing coats or T-shirts (the observations). Over time, you learn: when people are wet + wearing heavy coats, it's probably raining outside. The HMM does exactly this — it infers the hidden market regime from observable signals.
+  </div>
+
+  <h3>The Training Process (What Happens During fit())</h3>
+  <div class="card-grid-3">
+    <div class="card">
+      <div class="card-title">1. Initialize</div>
+      <p>Randomly assign each day to one of 3 states (Bull/Bear/Sideways). Calculate the initial statistics of each state.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">2. Expectation (E)</div>
+      <p>Given current state statistics, calculate the probability that each day belongs to each state using the Baum-Welch algorithm.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">3. Maximization (M)</div>
+      <p>Update the state statistics (means and covariances) to best explain the observed probabilities. Repeat E→M until converged.</p>
+    </div>
+  </div>
+
+  <h3>The Prediction Process (What Happens During predict())</h3>
+  <p>Given a fitted model and new observations (feature matrix), the <strong>Viterbi algorithm</strong> finds the single most likely sequence of hidden states that explains the observed data. This produces one label (Bull/Bear/Sideways) per trading day.</p>
+
+  <h3>Auto-Labeling: How States Get Named</h3>
+  <p>The HMM produces states named 0, 1, 2 — it doesn't know which is Bull or Bear. After training, we look at each state's learned mean for <code>spy_log_ret</code> (daily return):</p>
+  <ul>
+    <li><strong>Highest mean return → Bull</strong> (markets went up more often in this state)</li>
+    <li><strong>Lowest mean return → Bear</strong> (markets fell most often in this state)</li>
+    <li><strong>Middle mean return → Sideways</strong> (neither strongly up nor down)</li>
+  </ul>
+
+  <h3>Minimum Regime Hold Smoothing</h3>
+  <div class="highlight tip">
+    <strong>🛡️ Why this matters</strong>
+    Raw HMM output can sometimes produce 1–2 day "blips" where the market is labeled Bull, then Bear for 2 days, then Bull again. These short transitions are almost certainly noise, not real regime changes. The 5-day minimum hold rule filters them out: a regime must persist for at least 5 consecutive trading days before it's confirmed. This dramatically improves signal quality.
+  </div>
+
+  <h3>Covariance Type: 'full'</h3>
+  <p>We use the <code>full</code> covariance type, meaning each regime gets its own complete 15×15 covariance matrix. This allows the model to learn that during Bear markets, for example, VIX rising and returns falling are correlated — it captures the full statistical relationships between features per regime, not just individual feature means.</p>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6: CODE TOUR -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 06</div>
+  <h2>Code Tour</h2>
+  <p class="section-intro">How to use the three completed modules in code — with real examples.</p>
+
+  <h3>Phase 1 — Fetching Data</h3>
+  <pre><span class="kw">from</span> src.data_loader <span class="kw">import</span> DataLoader
+
+<span class="comment"># Create loader with default config (2005 → today, 10 ETFs)</span>
+loader = <span class="cls">DataLoader</span>()
+
+<span class="comment"># Fetch 15+ years of ETF price data (caches to parquet)</span>
+etf_prices = loader.<span class="fn">fetch_etf_data</span>()
+<span class="comment"># → DataFrame: rows=trading days, cols=SPY,QQQ,IWM,GLD,TLT...</span>
+
+<span class="comment"># Fetch FRED macro indicators (requires API key in .env)</span>
+macro_data = loader.<span class="fn">fetch_macro_data</span>()
+<span class="comment"># → DataFrame: rows=trading days, cols=vix,yield_10y,cpi...</span>
+
+<span class="comment"># Get the clean combined dataset (ETF + macro merged)</span>
+data = loader.<span class="fn">get_combined_data</span>()
+<span class="comment"># → Ready for FeatureEngineer. First call may take 30-60 seconds.</span>
+<span class="comment"># → Second call loads from cache in &lt;1 second.</span></pre>
+
+  <h3>Phase 2 — Engineering Features</h3>
+  <pre><span class="kw">from</span> src.feature_engineer <span class="kw">import</span> FeatureEngineer
+
+fe = <span class="cls">FeatureEngineer</span>()
+
+<span class="comment"># Compute all 15 features from raw data</span>
+X_raw = fe.<span class="fn">compute_features</span>(data)
+<span class="comment"># → DataFrame shape (T, 15), warmup rows dropped, no NaNs</span>
+
+<span class="comment"># Normalize using StandardScaler (zero mean, unit variance)</span>
+X_norm = fe.<span class="fn">fit_transform</span>(X_raw)
+
+<span class="comment"># Explore feature quality</span>
+summary = fe.<span class="fn">summary</span>(X_raw)
+mi_scores = fe.<span class="fn">feature_importance</span>(X_raw)   <span class="comment"># mutual info scores</span></pre>
+
+  <h3>Phase 3 — Detecting Regimes</h3>
+  <pre><span class="kw">from</span> src.regime_detector <span class="kw">import</span> RegimeDetector
+
+rd = <span class="cls">RegimeDetector</span>(n_regimes=<span class="num">3</span>, n_iter=<span class="num">200</span>, min_regime_hold=<span class="num">5</span>)
+
+<span class="comment"># Train HMM on normalized feature matrix</span>
+rd.<span class="fn">fit</span>(X_norm)
+<span class="fn">print</span>(rd.<span class="fn">summary</span>())    <span class="comment"># Shows label map, log-likelihood, convergence</span>
+
+<span class="comment"># Predict one label per trading day</span>
+regimes = rd.<span class="fn">predict</span>(X_norm)
+<span class="comment"># → pd.Series: date → "Bull" / "Bear" / "Sideways"</span>
+
+<span class="comment"># Get confidence probabilities</span>
+proba = rd.<span class="fn">predict_proba</span>(X_norm)
+<span class="comment"># → pd.DataFrame: date → {Bull: 0.82, Bear: 0.11, Sideways: 0.07}</span>
+
+<span class="comment"># Save the trained model to disk</span>
+rd.<span class="fn">save</span>(<span class="str">"models/regime_hmm.pkl"</span>)
+
+<span class="comment"># Later — load it back</span>
+rd2 = RegimeDetector.<span class="fn">load</span>(<span class="str">"models/regime_hmm.pkl"</span>)</pre>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7: NEXT STEP — PHASE 4 -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 07 · What's Next</div>
+  <h2>Phase 4: Portfolio Optimization</h2>
+  <p class="section-intro">The next step — using the detected regime to decide how to allocate money across the 10 ETFs.</p>
+
+  <div class="highlight warn">
+    <strong>📍 Current Position</strong>
+    Phases 1, 2, and 3 are complete and fully tested (122 unit tests, all passing). Phase 4 is the immediate next step.
+  </div>
+
+  <h3>What Phase 4 Will Build</h3>
+  <p>A <code>PortfolioOptimizer</code> class that takes the current regime as input and outputs optimal portfolio weights for the 10 ETFs. It uses <strong>PyPortfolioOpt</strong>, an industry-standard Python library implementing Harry Markowitz's Modern Portfolio Theory (Nobel Prize 1990).</p>
+
+  <h3>Regime-Conditional Allocation Logic</h3>
+  <div class="card-grid-3">
+    <div class="card" style="border-top: 3px solid #16a34a;">
+      <div class="card-title" style="color:#16a34a">🐂 Bull Regime</div>
+      <p>Target: maximize returns. Tilt heavily toward growth equities.</p>
+      <ul style="font-size:12px; color:#334155; margin-top:8px">
+        <li>SPY, QQQ, IWM: higher weights</li>
+        <li>EFA, EEM: moderate</li>
+        <li>TLT, GLD: minimal</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top: 3px solid #dc2626;">
+      <div class="card-title" style="color:#dc2626">🐻 Bear Regime</div>
+      <p>Target: preserve capital. Rotate to safe havens and bonds.</p>
+      <ul style="font-size:12px; color:#334155; margin-top:8px">
+        <li>TLT, GLD: higher weights</li>
+        <li>LQD: moderate</li>
+        <li>SPY, QQQ, IWM: minimal</li>
+      </ul>
+    </div>
+    <div class="card" style="border-top: 3px solid #d97706;">
+      <div class="card-title" style="color:#d97706">↔️ Sideways Regime</div>
+      <p>Target: balanced growth + safety. Diversify across all.</p>
+      <ul style="font-size:12px; color:#334155; margin-top:8px">
+        <li>All assets: moderate weights</li>
+        <li>Maximize Sharpe ratio</li>
+        <li>No strong tilt</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Constraints Applied</h3>
+  <ul>
+    <li><strong>Maximum position:</strong> No single ETF can exceed 30% of the portfolio</li>
+    <li><strong>Minimum position:</strong> No single ETF below 5% (ensures diversification)</li>
+    <li><strong>Weights sum to 100%</strong> — fully invested at all times</li>
+    <li><strong>Long-only:</strong> No short selling (keeps it practical)</li>
+  </ul>
+
+  <h3>Optimization Objective</h3>
+  <p>For Bull: maximize expected return. For Bear: minimize volatility. For Sideways: maximize <strong>Sharpe Ratio</strong> (return per unit of risk — the gold standard portfolio metric).</p>
+
+  <h3>Files That Will Be Created</h3>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">📄 src/portfolio_optimizer.py</div>
+      <p>The <code>PortfolioOptimizer</code> class with regime-conditional optimization using PyPortfolioOpt + cvxpy.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">🧪 tests/test_portfolio_optimizer.py</div>
+      <p>Full unit test suite covering weight constraints, regime switching, and edge cases.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">📓 notebooks/04_portfolio_optimization.py</div>
+      <p>Demo notebook showing the optimization for each regime with weight charts.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">⚙️ src/config.py updates</div>
+      <p>Add regime-specific target return/risk parameters for each optimization objective.</p>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- SECTION 8: PROJECT STRUCTURE -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div class="content section-break">
+  <div class="section-label">Section 08</div>
+  <h2>Project Structure &amp; Technology Stack</h2>
+  <p class="section-intro">Every file and every library explained.</p>
+
+  <h3>Directory Structure</h3>
+  <pre><span class="comment">market-regime-detector/</span>
+├── src/
+│   ├── config.py              <span class="comment"># All parameters in one place</span>
+│   ├── data_loader.py         <span class="comment"># Phase 1: Fetch + cache market data</span>
+│   ├── feature_engineer.py    <span class="comment"># Phase 2: Compute 15 ML features</span>
+│   ├── regime_detector.py     <span class="comment"># Phase 3: HMM regime classification</span>
+│   └── __init__.py
+├── tests/
+│   ├── test_data_loader.py    <span class="comment"># 18 tests for Phase 1</span>
+│   ├── test_feature_engineer.py  <span class="comment"># 45 tests for Phase 2</span>
+│   └── test_regime_detector.py   <span class="comment"># 59 tests for Phase 3</span>
+├── notebooks/
+│   ├── 01_eda.py              <span class="comment"># Exploratory data analysis</span>
+│   ├── 02_feature_engineering.py
+│   └── 03_regime_detection.py
+├── data/
+│   ├── raw/                   <span class="comment"># Parquet cache: etf_prices, macro_data</span>
+│   └── processed/             <span class="comment"># Parquet cache: combined_dataset</span>
+├── models/
+│   └── regime_hmm.pkl         <span class="comment"># Saved HMM model</span>
+├── .env                       <span class="comment"># FRED_API_KEY goes here</span>
+└── requirements.txt           <span class="comment"># All Python dependencies</span></pre>
+
+  <h3>Technology Stack</h3>
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-name">yfinance</div>
+      <div class="tech-use">Free ETF/stock price data from Yahoo Finance. 20+ years of daily OHLCV.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">fredapi</div>
+      <div class="tech-use">US Federal Reserve economic data (VIX, yields, CPI, unemployment).</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">pandas</div>
+      <div class="tech-use">Core data manipulation. Time-series alignment, rolling windows, resampling.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">numpy</div>
+      <div class="tech-use">Numerical computations. Log returns, rolling statistics, matrix math.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">scikit-learn</div>
+      <div class="tech-use">StandardScaler for normalization. Mutual information for feature selection.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">hmmlearn</div>
+      <div class="tech-use">Gaussian HMM implementation. The core regime detection engine (Phase 3).</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">joblib</div>
+      <div class="tech-use">Model persistence. Save and reload fitted HMM models to/from .pkl files.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">pyarrow</div>
+      <div class="tech-use">Parquet file format. Fast columnar storage for caching large DataFrames.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">PyPortfolioOpt</div>
+      <div class="tech-use">Phase 4: Efficient Frontier, Sharpe maximization, Mean-Variance Optimization.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">cvxpy</div>
+      <div class="tech-use">Phase 4: Convex optimization solver for portfolio constraints.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">vectorbt</div>
+      <div class="tech-use">Phase 5: Fast portfolio backtesting with transaction costs.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">Streamlit</div>
+      <div class="tech-use">Phase 6: Interactive web dashboard. No HTML/JS needed.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">plotly</div>
+      <div class="tech-use">Phase 6: Interactive charts for regime timeline and portfolio allocation.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">pytest</div>
+      <div class="tech-use">Unit testing. 122 tests currently passing across all 3 completed phases.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">python-dotenv</div>
+      <div class="tech-use">Load FRED_API_KEY from .env file securely without hardcoding secrets.</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-name">scipy</div>
+      <div class="tech-use">Statistical functions. Used internally by hmmlearn for probability distributions.</div>
+    </div>
+  </div>
+
+  <h3>Testing Summary</h3>
+  <table class="feature-table">
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Module</th>
+        <th>Test File</th>
+        <th>Tests</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Phase 1</td>
+        <td><code>data_loader.py</code></td>
+        <td><code>test_data_loader.py</code></td>
+        <td>18</td>
+        <td style="color:#16a34a; font-weight:700">✓ All Pass</td>
+      </tr>
+      <tr>
+        <td>Phase 2</td>
+        <td><code>feature_engineer.py</code></td>
+        <td><code>test_feature_engineer.py</code></td>
+        <td>45</td>
+        <td style="color:#16a34a; font-weight:700">✓ All Pass</td>
+      </tr>
+      <tr>
+        <td>Phase 3</td>
+        <td><code>regime_detector.py</code></td>
+        <td><code>test_regime_detector.py</code></td>
+        <td>59</td>
+        <td style="color:#16a34a; font-weight:700">✓ All Pass</td>
+      </tr>
+      <tr>
+        <td colspan="3"><strong>Total</strong></td>
+        <td><strong>122</strong></td>
+        <td style="color:#16a34a; font-weight:700">✓ 122 / 122</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-footer">
+    Market Regime Detector + Portfolio Optimizer &nbsp;·&nbsp; Project Documentation &nbsp;·&nbsp; Phase 3 Complete &nbsp;·&nbsp; April 2026
+  </div>
+</div>
+
+</body>
+</html>
