@@ -290,7 +290,7 @@ def get_asset_details(ticker: str):
         "news": news_items
     }
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check():
     return {"status": "ok", "message": "FastAPI is running the ML Pipeline"}
 
