@@ -49,7 +49,6 @@ _CACHE: Dict[str, Any] = {
 
 def get_live_market_data():
     """Fetches the latest data through the pipeline."""
-    # We load standard pipeline
     loader = DataLoader()
     
     try:
@@ -58,15 +57,22 @@ def get_live_market_data():
         logger.error(f"Failed to fetch data: {e}")
         raise HTTPException(status_code=500, detail="Failed to load market data")
 
-    # If no FRED key, mock macro data exactly as we did in backtester
-    if "vix" not in combined.columns or combined["vix"].isna().all():
-        logger.warning("Mocking macro data because FRED key is missing")
+    # Mock macro data if FRED data is missing or incomplete
+    # This handles: no FRED key, FRED timeout, empty macro DataFrame
+    needs_mock = (
+        "vix" not in combined.columns
+        or combined["vix"].isna().all()
+        or "yield_spread" not in combined.columns
+        or "cpi" not in combined.columns
+    )
+    if needs_mock:
+        logger.warning("Mocking macro data (FRED unavailable or incomplete)")
         n = len(combined)
         rng = np.random.default_rng(42)
-        combined["vix"] = rng.uniform(10, 40, n)
-        combined["yield_10y"] = rng.uniform(1.5, 4.5, n)
-        combined["yield_2y"] = rng.uniform(0.5, 4.0, n)
-        combined["cpi"] = 272.0 + np.cumsum(rng.uniform(0.0, 0.3, n))
+        combined["vix"]          = rng.uniform(10, 40, n)
+        combined["yield_10y"]    = rng.uniform(1.5, 4.5, n)
+        combined["yield_2y"]     = rng.uniform(0.5, 4.0, n)
+        combined["cpi"]          = 272.0 + np.cumsum(rng.uniform(0.0, 0.3, n))
         combined["unemployment"] = rng.uniform(3.5, 10.0, n)
         combined["yield_spread"] = combined["yield_10y"] - combined["yield_2y"]
 
@@ -77,7 +83,7 @@ def get_live_market_data():
         X_norm = fe.fit_transform(X_raw)
     except Exception as e:
         logger.error(f"Failed feature engineering: {e}")
-        raise HTTPException(status_code=500, detail="Failed feature engineering")
+        raise HTTPException(status_code=500, detail=f"Failed feature engineering: {e}")
         
     prices = loader.fetch_etf_data()
     prices.columns = [c.lower() for c in prices.columns]
