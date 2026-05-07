@@ -9,6 +9,8 @@ import {
   Layers, Terminal, Search
 } from "lucide-react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
 // --- Types ---
 interface ApiData {
   date: string;
@@ -52,7 +54,7 @@ export default function Home() {
 
   const fetchMainData = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/live-status?t=" + Date.now().toString(), { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/live-status?t=` + Date.now().toString(), { cache: "no-store" });
       if (!res.ok) throw new Error("Backend offline");
       const json = await res.json();
       setData(json);
@@ -65,7 +67,7 @@ export default function Home() {
 
   const fetchVitals = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/global-vitals?t=" + Date.now().toString(), { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/global-vitals?t=` + Date.now().toString(), { cache: "no-store" });
       if (res.ok) setVitals(await res.json());
     } catch (e) {
       console.error("Vitals failed", e);
@@ -123,7 +125,7 @@ export default function Home() {
     setModalLoading(true);
     setModalData(null);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/asset-details/${ticker}?t=${Date.now()}`, { cache: "no-store" });
+      const res = await fetch(`${API_BASE}/api/asset-details/${ticker}?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) setModalData(await res.json());
     } catch (e) {
       console.error(e);
