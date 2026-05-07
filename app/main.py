@@ -31,7 +31,9 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://market-regime-detector.vercel.app",  # Vercel default domain
+        "https://market-regime-detector-two.vercel.app",  # Production Vercel URL
+        "https://market-regime-detector.vercel.app",      # Vercel default domain
+        "https://market-regime-detector.onrender.com",    # Render self-reference
     ],
     allow_origin_regex=r"https://.*\.vercel\.app",   # All Vercel preview URLs
     allow_credentials=True,
