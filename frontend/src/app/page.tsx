@@ -48,6 +48,7 @@ export default function Home() {
   const [modalLoading, setModalLoading] = useState(false);
   const [bootSequence, setBootSequence] = useState(0); // 0-100 for boot animation
   const [mounted, setMounted] = useState(false);
+  const [selectedRegime, setSelectedRegime] = useState<string | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -184,7 +185,8 @@ export default function Home() {
     return entry ? entry[1] : 0;
   };
 
-  const currentSureness = getProb(data.regime);
+  const displayRegime = selectedRegime || data.regime;
+  const currentSureness = getProb(displayRegime);
 
   return (
     <div className="min-h-screen bg-surface flex font-sans crt-overlay selection:bg-primary/30" ref={containerRef}>
@@ -327,12 +329,18 @@ export default function Home() {
             </div>
             
             <div className="mt-4 grid grid-cols-3 gap-2">
-               {Object.entries(data.probabilities || {}).map(([reg, prob], i) => (
-                 <div key={i} className={`p-2 rounded-lg text-center border ${reg.toLowerCase() === data.regime.toLowerCase() ? 'border-primary/40 bg-primary/5' : 'border-outline-variant/30 opacity-50'}`}>
+               {Object.entries(data.probabilities || {}).map(([reg, prob], i) => {
+                 const isSelected = reg.toLowerCase() === displayRegime.toLowerCase();
+                 return (
+                 <div 
+                   key={i} 
+                   onClick={() => setSelectedRegime(reg)}
+                   className={`p-2 rounded-lg text-center border cursor-pointer transition-all ${isSelected ? 'border-primary/40 bg-primary/5 shadow-[0_0_15px_rgba(152,240,64,0.1)]' : 'border-outline-variant/30 opacity-50 hover:opacity-80 hover:border-outline-variant'}`}
+                 >
                     <p className="text-[8px] font-bold uppercase mb-0.5">{reg}</p>
                     <p className="text-xs font-mono font-bold text-white">{Math.round(prob * 100)}%</p>
                  </div>
-               ))}
+               )})}
             </div>
           </div>
 
